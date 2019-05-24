@@ -1,0 +1,17 @@
+---
+###############################################################
+# Title:       Bootstrap Role                                 #
+# Author(s):   Joao Berardo                                   #
+# URL:         https://github.com/jberardo/ansible-bootstrap  #
+###############################################################
+
+# To encrypt passwords:
+# ansible all -i localhost, -m debug -a "msg={{ 'mypassword' | password_hash('sha512', 'mysecretsalt') }}"
+# or mkpasswd --method=sha-512
+- name: Set User Variables
+  import_tasks: "subtasks/user.yml"
+  tags: always
+
+- name: APT Tasks
+  import_tasks: "subtasks/apt.yml"
+  tags: always

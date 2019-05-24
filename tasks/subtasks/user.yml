@@ -1,0 +1,29 @@
+---
+- name: "check if user exists"
+  shell: "id -un {{ user }} >/dev/null 2>&1;"
+  register: user_check
+  failed_when: user_check.rc > 1
+
+- name: "create user"
+  block:
+    - name: "create user"
+      user: 
+        name: "{{ user }}"
+        password: "{{ user_password }}"
+        shell: /bin/bash
+        generate_ssh_key: yes
+        ssh_key_bits: 4096
+        ssh_key_file: .ssh/id_rsa
+    - name: "authorized key / passwordless logins"
+      authorized_key: user="{{ user }}" key="{{ lookup('file', '/home/{{ user }}/.ssh/id_rsa.pub') }}"
+    - name: "Add normal user to sudoers"
+      lineinfile: dest=/etc/sudoers regexp="{{ user }} ALL" line="{{ user }} ALL=(ALL) NOPASSWD:ALL" state=present
+  when: user_check.rc >= 1  # create user only if it doesn't exist
+
+- name: "set user variables"
+  block:
+    - name: "get '{{ user }}' info"
+      user:
+        name: "{{ user }}"
+      register: user_info
+  when: user_check.rc == 0 # if the user already exists, get its name

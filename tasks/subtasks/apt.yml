@@ -1,0 +1,9 @@
+---
+- name: APT | Remove APT locks
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/var/lib/apt/lists/lock"
+    - "/var/cache/apt/archives/lock"
+    - "/var/lib/dpkg/lock"
